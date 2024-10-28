@@ -2,15 +2,26 @@ from utils import *
 from crosscoder import CrossCoder
 from buffer import Buffer
 import tqdm
+from nnsight import LanguageModel
+from nnsight.envoy import Envoy
+from typing import Iterator
 
 from torch.nn.utils import clip_grad_norm_
 class Trainer:
-    def __init__(self, cfg, model_A, model_B, all_tokens):
+    def __init__(
+            self, 
+            data: Iterator[str], 
+            cfg, 
+            model_A: LanguageModel, 
+            model_B: LanguageModel, 
+            submodule_A: Envoy, 
+            submodule_B: Envoy
+        ):
         self.cfg = cfg
         self.model_A = model_A
         self.model_B = model_B
         self.crosscoder = CrossCoder(cfg)
-        self.buffer = Buffer(cfg, model_A, model_B, all_tokens)
+        self.buffer = Buffer(data, cfg, model_A, model_B, submodule_A, submodule_B)
         self.total_steps = cfg["num_tokens"] // cfg["batch_size"]
 
         self.optimizer = torch.optim.Adam(
