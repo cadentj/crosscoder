@@ -1,5 +1,5 @@
 
-from utils import *
+from .utils import *
 
 from torch import nn
 import pprint
@@ -10,7 +10,7 @@ from huggingface_hub import hf_hub_download
 from typing import NamedTuple
 
 DTYPES = {"fp32": torch.float32, "fp16": torch.float16, "bf16": torch.bfloat16}
-SAVE_DIR = Path("/share/u/caden/crosscoder/trained_crosscoders/checkpoints")
+SAVE_DIR = Path("/share/u/caden/crosscoders/trained_crosscoders/checkpoints")
 
 class LossOutput(NamedTuple):
     # loss: torch.Tensor
@@ -79,6 +79,23 @@ class CrossCoder(nn.Module):
             acts = x_enc + self.b_enc
         return acts
 
+    def encode_no_bias(self, x, apply_relu=True):
+        # x: [batch, n_models, d_model]
+        x_enc = einops.einsum(
+            x,
+            self.W_enc,
+            "batch n_models d_model, n_models d_model d_hidden -> batch d_hidden",
+        )
+        if apply_relu:
+            acts = F.relu(x_enc)
+        else:
+            acts = x_enc
+            
+        return acts
+    
+    def set_normalization_factor(self, normalization_factor):
+        self.cfg["normalization_factor"] = normalization_factor
+
     def decode(self, acts):
         # acts: [batch, d_hidden]
         acts_dec = einops.einsum(
@@ -125,7 +142,7 @@ class CrossCoder(nn.Module):
         return LossOutput(l2_loss=l2_loss, l1_loss=l1_loss, l0_loss=l0_loss, explained_variance=explained_variance, explained_variance_A=explained_variance_A, explained_variance_B=explained_variance_B)
 
     def create_save_dir(self):
-        base_dir = Path("/share/u/caden/crosscoder/trained_crosscoders/checkpoints")
+        base_dir = Path("/share/u/caden/crosscoders/trained_crosscoders/checkpoints")
         version_list = [
             int(file.name.split("_")[1])
             for file in list(SAVE_DIR.iterdir())
@@ -200,7 +217,7 @@ class CrossCoder(nn.Module):
 
     @classmethod
     def load(cls, version_dir, checkpoint_version):
-        save_dir = Path("/share/u/caden/crosscoder/trained_crosscoders/checkpoints") / str(version_dir)
+        save_dir = Path("/share/u/caden/crosscoders/trained_crosscoders/checkpoints") / str(version_dir)
         cfg_path = save_dir / f"{str(checkpoint_version)}_cfg.json"
         weight_path = save_dir / f"{str(checkpoint_version)}.pt"
 

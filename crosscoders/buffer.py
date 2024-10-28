@@ -5,7 +5,7 @@ from tqdm import tqdm
 from nnsight.envoy import Envoy
 from nnsight import LanguageModel
 
-from utils import *
+from .utils import *
 
 class Buffer:
     """
@@ -61,6 +61,12 @@ class Buffer:
 
         self.pointer = 0
         self.refresh()
+
+    def get_normalization_factor(self):
+        return {
+            "A": self.normalisation_factor[0],
+            "B": self.normalisation_factor[1],
+        }
 
     @torch.no_grad()
     def estimate_norm_scaling_factor(self, batch_size, model, submodule, n_batches_for_norm_estimate: int = 100):

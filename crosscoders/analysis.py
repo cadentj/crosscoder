@@ -1,7 +1,8 @@
 # %%
-from utils import *
-from crosscoder import CrossCoder
-torch.set_grad_enabled(False);
+from .utils import *
+from .crosscoder import CrossCoder
+torch.set_grad_enabled(False)
+
 # %%
 cross_coder = CrossCoder.load_from_hf()
 
@@ -9,8 +10,10 @@ cross_coder = CrossCoder.load_from_hf()
 norms = cross_coder.W_dec.norm(dim=-1)
 norms.shape
 # %%
+
 relative_norms = norms[:, 1] / norms.sum(dim=-1)
 relative_norms.shape
+
 # %%
 
 fig = px.histogram(

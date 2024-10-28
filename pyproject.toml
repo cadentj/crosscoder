@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Crosscoders"
+version = "0.1.0"
+description = "..."
+requires-python = ">=3.10"
+dependencies = [
+    "nnsight",
+    "transformer_lens"
+]
+
+[tool.setuptools.packages.find]
+include = ["crosscoders*"]

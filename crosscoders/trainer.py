@@ -1,6 +1,6 @@
-from utils import *
-from crosscoder import CrossCoder
-from buffer import Buffer
+from .utils import *
+from .crosscoder import CrossCoder
+from .buffer import Buffer
 import tqdm
 from nnsight import LanguageModel
 from nnsight.envoy import Envoy
@@ -22,6 +22,10 @@ class Trainer:
         self.model_B = model_B
         self.crosscoder = CrossCoder(cfg)
         self.buffer = Buffer(data, cfg, model_A, model_B, submodule_A, submodule_B)
+
+        # Set calculated normalization factor on crosscoder
+        self.crosscoder.set_normalization_factor(self.buffer.get_normalization_factor())
+
         self.total_steps = cfg["num_tokens"] // cfg["batch_size"]
 
         self.optimizer = torch.optim.Adam(
